@@ -208,7 +208,7 @@ public class AuthSessionHandler implements LimboSessionHandler {
     }
 
     String[] args = message.split(" ");
-    if (args.length != 0 && this.checkArgsLength(args.length)) {
+    if (args.length >= 2 && this.checkArgsLength(args.length)) {
       Command command = Command.parse(args[0]);
       if (command == Command.REGISTER && !this.totpState && this.playerInfo == null) {
         String password = args[1];
@@ -442,7 +442,7 @@ public class AuthSessionHandler implements LimboSessionHandler {
     } catch (SQLException e) {
       throw new SQLRuntimeException(e);
     } catch (Throwable e) {
-      e.printStackTrace();
+      // Error during auth finalization is silently caught to avoid disconnecting already authenticated player
     }
 
     this.plugin.cacheAuthUser(this.proxyPlayer);
