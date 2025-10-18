@@ -1114,6 +1114,7 @@ public class LimboAuth {
   public static final class InetAddressRateLimiter {
     private final long windowMillis;
     private final ConcurrentHashMap<InetAddress, Long> lastAttempt = new ConcurrentHashMap<>();
+    private static final long CLEANUP_INTERVAL = 3600000; // 1 hour in milliseconds
 
     public InetAddressRateLimiter(long windowMillis) {
       this.windowMillis = windowMillis;
@@ -1125,6 +1126,10 @@ public class LimboAuth {
 
       if (lastAttemptTime == null || now - lastAttemptTime >= this.windowMillis) {
         this.lastAttempt.put(address, now);
+        // Periodically cleanup old entries to prevent memory leaks
+        if (now % 60000 == 0) { // cleanup every minute
+          this.lastAttempt.entrySet().removeIf(e -> now - e.getValue() > CLEANUP_INTERVAL);
+        }
         return true;
       }
 
